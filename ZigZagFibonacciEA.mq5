@@ -298,12 +298,31 @@ int OnInit() {
    g_trade.SetAsyncMode(false);
    SetBestFillingMode();
    
+   // Try multiple ZigZag paths (different MT5 installations have different structures)
    g_zigzagHandle = iCustom(_Symbol, PERIOD_CURRENT, "Examples\\ZigZag",
                             InpZigZagDepth, InpZigZagDeviation, InpZigZagBackstep);
+
+   if(g_zigzagHandle == INVALID_HANDLE) {
+      Print("⚠ WARNING: ZigZag not found at 'Examples\\ZigZag', trying alternative path...");
+      g_zigzagHandle = iCustom(_Symbol, PERIOD_CURRENT, "Indicators\\Examples\\ZigZag",
+                               InpZigZagDepth, InpZigZagDeviation, InpZigZagBackstep);
+   }
+
+   if(g_zigzagHandle == INVALID_HANDLE) {
+      Print("⚠ WARNING: Trying ZigZag without path...");
+      g_zigzagHandle = iCustom(_Symbol, PERIOD_CURRENT, "ZigZag",
+                               InpZigZagDepth, InpZigZagDeviation, InpZigZagBackstep);
+   }
+
    if(g_zigzagHandle == INVALID_HANDLE) {
       Print("❌ ERROR: Failed to create ZigZag indicator!");
+      Print("   Please ensure ZigZag indicator is installed in:");
+      Print("   - <MT5_Data>\\MQL5\\Indicators\\Examples\\ZigZag.ex5");
+      Print("   - OR compile it from ZigZag.mq5 source");
       return INIT_FAILED;
    }
+
+   Print("✓ ZigZag indicator loaded successfully");
 
    g_atrHandle = iATR(_Symbol, PERIOD_CURRENT, InpTrailATR_Period);
    if(g_atrHandle == INVALID_HANDLE) {
